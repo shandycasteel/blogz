@@ -4,7 +4,7 @@ import datetime
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://build-a-blog:build-a-blog@localhost:8889/build-a-blog"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://blogz:blogz@localhost:8889/blogz"
 app.config["SQLALCHEMY_ECHO"] = True
 app.secret_key = "z!97tvMYD_E92zNVBGUq-_UzfGHQVk"
 db = SQLAlchemy(app)
@@ -17,6 +17,7 @@ class Blog(db.Model):
     title = db.Column(db.String(120))
     body = db.Column(db.Text)
     posted = db.Column(db.DateTime, default=datetime.datetime.now())
+    owner_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
     def __init__(self, title, body, posted):
         self.title = title
@@ -25,6 +26,23 @@ class Blog(db.Model):
 
     def __repr__(self):
         return f'Post Title: "{self.title}" | Post Date: {self.posted}'
+
+
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(32), unique=True)
+    password = db.Column(db.String(32))
+    blogs = db.relationship("Blog", backref="owner")
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+    def __repr__(self):
+        return f"Username: {self.username}"
+
+
 
 
 @app.route("/blog")

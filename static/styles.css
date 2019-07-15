@@ -106,9 +106,10 @@ ul#error {
     margin: 0;
 }
 
-nav  {
+nav {
     background-color: black;
     height: 80px;
+    width: 100%;
     display: flex;
     align-items: center;
     box-shadow: 0 5px 10px 0 grey;
