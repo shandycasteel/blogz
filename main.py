@@ -62,6 +62,64 @@ def index():
         return render_template("blog.html", all_posts=all_posts)
 
 
+@app.route("/login", methods=["POST", "GET"])
+def login():
+
+    # Checks to see if a username/password was submitted, then verifies
+    if request.method == "POST":
+        username  = request.form["username"]
+        password = request.form["password"]
+        # Creates a new User object
+        users = User.query.filter_by(username=username)
+        
+        if users.count() == 1:
+            user = users.first()
+            if password == user.password:
+                session['user'] = user.username
+                flash("Welcome back, " + user.username + "!")
+                return redirect("/newpost")
+            else:
+                flash("That password is incorrect.")
+                return render_template("login.html", username=username)
+        
+        elif users.count() == 0:
+            flash("That user does not exist.")
+            return render_template("login.html")
+
+    else:
+        return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    del session["user"]
+    return redirect("/blog")
+
+
+@app.route("/signup", methods=["POST", "GET"])
+def signup():
+
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        verify = request.form["verify"]
+
+        if len(username) >= 3 and len(password) >= 3 and verify == password:
+            # If the username and password/verify check out, create a user object and commit to db
+            user = User(username, password)
+            db.session.add(user)
+            db.session.commit()
+
+            # Create a session, store username, and rederict to /newpost page
+            session['user'] = user.username
+            redirect("/newpost")
+
+
+
+    else:
+        return render_template("signup.html")
+
+
 @app.route("/newpost", methods=["POST", "GET"])
 def add_post():
 
