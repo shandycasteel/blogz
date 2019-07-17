@@ -106,14 +106,14 @@ ul {
 
 ul.left {
     float: left;
-    width: auto;
+    width: 60%;
 }
 
 ul.right {
     float: right;
-    width: auto;
+    width: 40%;
     text-align: right;
-    padding-right: 50px;
+    padding-right: 5%;
 }
 
 ul#error {

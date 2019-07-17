@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash
+from flask import Flask, request, redirect, render_template, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 
@@ -67,27 +67,23 @@ def login():
 
     # Checks to see if a username/password was submitted, then verifies
     if request.method == "POST":
-        username  = request.form["username"]
-        password = request.form["password"]
+        login_username  = request.form["username"]
+        login_password = request.form["password"]
         # Creates a new User object
-        users = User.query.filter_by(username=username)
+        user = User.query.filter_by(username=login_username).first()
         
-        if users.count() == 1:
-            user = users.first()
-            if password == user.password:
-                session['user'] = user.username
-                flash("Welcome back, " + user.username + "!")
-                return redirect("/newpost")
-            else:
-                flash("That password is incorrect.")
-                return render_template("login.html", username=username)
-        
-        elif users.count() == 0:
+        if user and login_password == user.password:
+            session['user'] = user.username
+            flash("Welcome back, " + user.username + "!")
+            return redirect("/newpost")
+        elif user and login_password != user.password:
+            flash("That password is incorrect.")
+            return render_template("login.html", username=login_username)
+        elif not user:
             flash("That user does not exist.")
             return render_template("login.html")
 
-    else:
-        return render_template("login.html")
+    return render_template("login.html")
 
 
 @app.route("/logout")
@@ -104,7 +100,10 @@ def signup():
         password = request.form["password"]
         verify = request.form["verify"]
 
-        if len(username) >= 3 and len(password) >= 3 and verify == password:
+        existing_user = User.query.filter_by(username = username).first()
+
+
+        if len(username) >= 3 and len(password) >= 3 and verify == password and not existing_user:
             # If the username and password/verify check out, create a user object and commit to db
             user = User(username, password)
             db.session.add(user)
@@ -112,9 +111,24 @@ def signup():
 
             # Create a session, store username, and rederict to /newpost page
             session['user'] = user.username
-            redirect("/newpost")
+            flash("Welcome, " + user.username + "!")
+            return redirect("/newpost")
 
+        if existing_user:
+            flash("That username is taken.")
+            return render_template("signup.html")
 
+        if len(username) < 3:
+            flash("Usernames must have more three or more characters.")
+            return render_template("signup.html")
+
+        if len(password) < 3:
+            flash("Passwords must have more three or more characters.")
+            return render_template("signup.html")
+
+        if verify != password:
+            flash("Passwords must match.")
+            return render_template("signup.html")
 
     else:
         return render_template("signup.html")
