@@ -65,17 +65,19 @@ def index():
 @app.route("/login", methods=["POST", "GET"])
 def login():
 
-    # Checks to see if a username/password was submitted, then verifies
+    # Checks to see if a username/password was submitted
     if request.method == "POST":
         login_username  = request.form["username"]
         login_password = request.form["password"]
-        # Creates a new User object
+        # Find out if username exists, return user object
         user = User.query.filter_by(username=login_username).first()
         
+        # Verifies username and password, sets session
         if user and login_password == user.password:
             session['user'] = user.username
             flash("Welcome back, " + user.username + "!")
             return redirect("/newpost")
+        # Returns login errors
         elif user and login_password != user.password:
             flash("That password is incorrect.")
             return render_template("login.html", username=login_username)
@@ -96,39 +98,45 @@ def logout():
 def signup():
 
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        verify = request.form["verify"]
+        signup_username = request.form["username"]
+        signup_password = request.form["password"]
+        signup_verify = request.form["verify"]
 
-        existing_user = User.query.filter_by(username = username).first()
+        # Find out if username exists
+        existing_user = User.query.filter_by(username = signup_username).first()
 
 
-        if len(username) >= 3 and len(password) >= 3 and verify == password and not existing_user:
-            # If the username and password/verify check out, create a user object and commit to db
-            user = User(username, password)
-            db.session.add(user)
+        if (len(signup_username) >= 3 and len(signup_password) >= 3 
+            and signup_verify == signup_password and not existing_user):
+            # If the username and password/verify check out, create a user 
+            # object and commit to db
+            new_user = User(signup_username, signup_password)
+            db.session.add(new_user)
             db.session.commit()
 
             # Create a session, store username, and rederict to /newpost page
-            session['user'] = user.username
-            flash("Welcome, " + user.username + "!")
+            session['user'] = new_user.username
+            flash("Welcome, " + new_user.username + "!")
             return redirect("/newpost")
 
+        # Signup validation checks and error messages
+        # If existing username, clears username field
+        # If username is valid but other checks fail, returns username to field
         if existing_user:
             flash("That username is taken.")
             return render_template("signup.html")
 
-        if len(username) < 3:
+        if len(signup_username) < 3:
             flash("Usernames must have more three or more characters.")
             return render_template("signup.html")
 
-        if len(password) < 3:
+        if len(signup_password) < 3:
             flash("Passwords must have more three or more characters.")
-            return render_template("signup.html")
+            return render_template("signup.html", signup_username=signup_username)
 
-        if verify != password:
+        if signup_verify != signup_password:
             flash("Passwords must match.")
-            return render_template("signup.html")
+            return render_template("signup.html", signup_username=signup_username)
 
     else:
         return render_template("signup.html")
@@ -159,7 +167,6 @@ def add_post():
             flash("Posts require both a title and a body...try again!")
             return render_template("add_post.html", new_title=new_title, new_body=new_body, title="Add a Blog Entry")
 
-    # Show the form
     else:
         return render_template("add_post.html")
 
