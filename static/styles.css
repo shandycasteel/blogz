@@ -43,7 +43,7 @@ form {
 
 input{
     font-size: 0.9em;
-    padding: 1.5em;
+    padding: 1.0em;
     border: 1px;
     border-style: solid;
     border-color: slategray;
@@ -106,13 +106,17 @@ ul {
 
 ul.left {
     float: left;
-    width: 60%;
+    flex-flow: row wrap;
+    margin-right: auto;
+    order: 1;
 }
 
 ul.right {
     float: right;
-    width: 40%;
     text-align: right;
+    flex-flow: row wrap;
+    margin-left: auto;
+    order: 2;
     padding-right: 5%;
 }
 
@@ -125,15 +129,15 @@ ul#error {
 
 nav {
     background-color: rgb(33, 32, 32);
-    height: 60px;
     width: 100%;
     display: flex;
     align-items: center;
     box-shadow: 0 5px 10px 0 grey;
+    flex-flow: row nowrap;
 }
 
 nav * {
-    display: inline;
+    display: inline-flex;
 }
 
 nav li {

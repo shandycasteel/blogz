@@ -46,7 +46,7 @@ class User(db.Model):
 
 
 @app.route("/blog")
-def index():
+def list_blogs():
     post_id = request.args.get('id')
 
     # If there's a GET parameter, sends to single-post form with post id
@@ -60,6 +60,12 @@ def index():
         # Bonus mission to sort in descending order using DateTime
         all_posts = Blog.query.order_by(Blog.posted.desc()).all()
         return render_template("blog.html", all_posts=all_posts)
+
+@app.before_request
+def require_login():
+    allowed_routes = ["index", "list_blogs", "signup", "login"]
+    if request.endpoint not in allowed_routes and 'user' not in session:
+        return redirect("/login")
 
 
 @app.route("/login", methods=["POST", "GET"])
