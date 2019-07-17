@@ -105,6 +105,9 @@ def signup():
         # Find out if username exists
         existing_user = User.query.filter_by(username = signup_username).first()
 
+        if signup_username.count(" ") != 0 or signup_password.count(" ") !=  0:
+            flash("You can not have spaces in a username or password.")
+            return render_template("signup.html")
 
         if (len(signup_username) >= 3 and len(signup_password) >= 3 
             and signup_verify == signup_password and not existing_user):
