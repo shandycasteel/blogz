@@ -89,7 +89,7 @@ h2 {
     padding-top: 25px;
 }
 
-h3{
+h3 {
     text-transform: uppercase;
 }
 
@@ -100,8 +100,26 @@ p {
     line-height: 1.5em;
 }
 
+.roster p {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.25em;
+    text-align: center;
+}
+
+.roster a {
+    color: #000;
+    text-decoration: none;
+}
+
+.roster a:hover {
+    background-color: rgb(210, 210, 210);
+    text-decoration: none;
+}
+
 ul {
     list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 ul.left {
@@ -117,7 +135,6 @@ ul.right {
     flex-flow: row wrap;
     margin-left: auto;
     order: 2;
-    padding-right: 5%;
 }
 
 ul#error {

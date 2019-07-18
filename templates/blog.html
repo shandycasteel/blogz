@@ -3,10 +3,12 @@
 
 <main>
 
-    {% if all_posts %}
-        {% for blog in all_posts %}
-            <h2><a href="./blog?id={{ blog.id }}"">{{blog.title}}</a></h2>
-            <p>{{blog.body}}</p>
+    {% if posts %}
+        {% for post in posts %}
+            <h2><a href="/blog?id={{ post.id }}"">{{post.title}}</a></h2>
+            <p>{{post.body}}</p>
+            <small>Posted by <a href="/blog?user={{ post.owner.id }}">{{post.owner.username}}</a>
+                on {{post.posted}}</small>
         {% endfor %}
 
     {% else %}
@@ -14,8 +16,9 @@
     
     {% endif %}
 
+</main>
+
 
 {% endblock %}
 
-</main>
 

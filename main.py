@@ -19,13 +19,14 @@ class Blog(db.Model):
     posted = db.Column(db.DateTime, default=datetime.datetime.now())
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
-    def __init__(self, title, body, posted):
+    def __init__(self, title, body, owner, posted):
         self.title = title
         self.body = body
+        self.owner = owner
         self.posted = posted
 
     def __repr__(self):
-        return f'Post Title: "{self.title}" | Post Date: {self.posted}'
+        return f'Post Title: "{self.title}" | Posted by: {self.owner} | Post Date: {self.posted}'
 
 
 class User(db.Model):
@@ -43,34 +44,15 @@ class User(db.Model):
         return f"Username: {self.username}"
 
 
-
-
-@app.route("/blog")
-def list_blogs():
-    post_id = request.args.get('id')
-
-    # If there's a GET parameter, sends to single-post form with post id
-    if post_id:
-        single_post = Blog.query.get(post_id)
-        return render_template('single_post.html', single_post=single_post)
-    else:
-        # Shows all blog posts in ascending order
-        # all_posts = Blog.query.all()
-
-        # Bonus mission to sort in descending order using DateTime
-        all_posts = Blog.query.order_by(Blog.posted.desc()).all()
-        return render_template("blog.html", all_posts=all_posts)
-
 @app.before_request
 def require_login():
-    allowed_routes = ["index", "list_blogs", "signup", "login"]
+    allowed_routes = ["index", "blog_listing", "signup", "login", "user_page", "static"]
     if request.endpoint not in allowed_routes and 'user' not in session:
         return redirect("/login")
 
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
-
     # Checks to see if a username/password was submitted
     if request.method == "POST":
         login_username  = request.form["username"]
@@ -93,6 +75,11 @@ def login():
 
     return render_template("login.html")
 
+    
+def logged_in_user():
+    owner = User.query.filter_by(username=session['user']).first()
+    return owner
+
 
 @app.route("/logout")
 def logout():
@@ -102,7 +89,6 @@ def logout():
 
 @app.route("/signup", methods=["POST", "GET"])
 def signup():
-
     if request.method == "POST":
         signup_username = request.form["username"]
         signup_password = request.form["password"]
@@ -151,6 +137,31 @@ def signup():
         return render_template("signup.html")
 
 
+@app.route("/")
+def index():
+    users = User.query.all()
+    return render_template("index.html", users=users)
+
+
+@app.route("/blog", methods=["POST", "GET"])
+def blog_listing():
+
+    post_id = request.args.get("id")
+    user_id = request.args.get("user")
+
+    if post_id:
+        post = Blog.query.get(post_id)
+        return render_template("single_post.html", post=post)
+
+    if user_id:
+        entries= Blog.query.filter_by(owner_id=user_id).order_by(Blog.posted.desc()).all()
+        return render_template("user_page.html", entries=entries)
+
+    else:
+        posts = Blog.query.order_by(Blog.posted.desc()).all()
+        return render_template("blog.html", posts=posts)
+
+    
 @app.route("/newpost", methods=["POST", "GET"])
 def add_post():
 
@@ -159,7 +170,7 @@ def add_post():
         post_date = request.args.get('posted')
         new_title = request.form["title"]
         new_body = request.form["body"]
-        new_post = Blog(new_title, new_body, post_date)
+        new_post = Blog(new_title, new_body, logged_in_user(), post_date)
 
         # Make sure there's something in title and body fields, commit to database
         if len(new_title) != 0 and len(new_body) != 0:

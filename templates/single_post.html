@@ -3,9 +3,10 @@
 
 <main>
 
-    <h2>{{single_post.title}}</h2>
-    <p>{{single_post.body}}</p>
-    <h6>Posted: {{single_post.posted}}</h6>
+    <h2>{{post.title}}</h2>
+    <p>{{post.body}}</p>
+    <small>Posted by <a href="/blog?user={{ post.owner.id }}">{{post.owner.username}}</a>
+        on {{post.posted}}</small>
 
 </main>
 
