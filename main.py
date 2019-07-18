@@ -154,7 +154,7 @@ def blog_listing():
         return render_template("single_post.html", post=post)
 
     if user_id:
-        entries= Blog.query.filter_by(owner_id=user_id).order_by(Blog.posted.desc()).all()
+        entries= Blog.query.filter_by(owner_id=user_id).all()
         return render_template("user_page.html", entries=entries)
 
     else:
