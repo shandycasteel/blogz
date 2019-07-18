@@ -28,8 +28,9 @@ body {
 
 .hero-text h1 {
      font-size: 4em;
+     text-decoration: none;
      letter-spacing: 0.1em;
-     text-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000;
+     text-shadow: -5px -5px 0 #000, 5px -5px 0 #000, -5px 5px 0 #000, 5px 5px 0 #000;
 }
 
 main {
@@ -181,4 +182,12 @@ nav a:hover {
 
 footer {
     padding-bottom: 80px;
+}
+
+.pagination a {
+    text-decoration: none;
+}
+
+.pagination a:hover {
+    text-decoration: underline;
 }

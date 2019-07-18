@@ -3,14 +3,29 @@
 
 <main>
 
-{% for entry in entries %}
-    <h2><a href="/blog?id={{ entry.id }}">{{entry.title}}</a></h2>
-    <p>{{entry.body}}</p>
-    <small>Posted by <a href="/blog?user={{ entry.owner.id }}">{{entry.owner.username}}</a>
-        on {{entry.posted}}</small>
-{% endfor %}
+    {% for entry in entries %}
+        <h2><a href="/blog?id={{ entry.id }}">{{entry.title}}</a></h2>
+        <p>{{entry.body}}</p>
+        <small>Posted by <a href="/blog?user={{ entry.owner.id }}">{{entry.owner.username}}</a>
+            on {{entry.posted}}</small>
+    {% endfor %}
+
+    <br /><br />
+
+    <div class="pagination">
+    {% if prev_url %}
+        <a href="{{ prev_url }}">&larr; Newer Posts</a>
+    {% endif %}
+
+    {% if prev_url and next_url %}
+        &verbar; <!-- divider -->
+    {% endif %}
+
+    {% if next_url %}
+        <a href="{{ next_url }}"> Older Posts &rarr;</a>
+    {% endif %}
+    </div>
 
 </main>
-
 
 {% endblock %}

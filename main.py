@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash, session
+from flask import Flask, request, redirect, render_template, flash, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 from hashutils import make_pw_hash, check_pw_hash
@@ -47,9 +47,45 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ["index", "blog_listing", "signup", "login", "user_page", "static"]
+    allowed_routes = ["index", "blog", "signup", "login", "user_page", "static"]
     if request.endpoint not in allowed_routes and 'user' not in session:
         return redirect("/login")
+
+
+@app.route("/")
+def index():
+    users = User.query.all()
+    return render_template("index.html", users=users)
+
+
+@app.route("/blog", methods=["POST", "GET"])
+def blog():
+
+    post_id = request.args.get("id")
+    user_id = request.args.get("user")
+    page = request.args.get("page", 1, type=int)
+    per_page = 5
+
+    if post_id:
+        post = Blog.query.get(post_id)
+        return render_template("single_post.html", post=post)
+
+    if user_id:
+        entries = Blog.query.filter_by(owner_id=user_id).order_by(Blog.posted.desc()).paginate(
+            page, per_page, error_out=False)
+        next_url = url_for("blog", user=user_id, page=entries.next_num) \
+            if entries.has_next else None
+        prev_url = url_for("blog", user=user_id, page=entries.prev_num) \
+            if entries.has_prev else None
+        return render_template("user_page.html", entries=entries.items, next_url=next_url, prev_url=prev_url)
+
+    else:
+        posts = Blog.query.order_by(Blog.posted.desc()).paginate(page, per_page, error_out=False)
+        next_url = url_for("blog", page=posts.next_num) \
+            if posts.has_next else None
+        prev_url = url_for("blog", page=posts.prev_num) \
+            if posts.has_prev else None
+        return render_template("blog.html", posts=posts.items, next_url=next_url, prev_url=prev_url)
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -136,31 +172,6 @@ def signup():
 
     else:
         return render_template("signup.html")
-
-
-@app.route("/")
-def index():
-    users = User.query.all()
-    return render_template("index.html", users=users)
-
-
-@app.route("/blog", methods=["POST", "GET"])
-def blog_listing():
-
-    post_id = request.args.get("id")
-    user_id = request.args.get("user")
-
-    if post_id:
-        post = Blog.query.get(post_id)
-        return render_template("single_post.html", post=post)
-
-    if user_id:
-        entries= Blog.query.filter_by(owner_id=user_id).all()
-        return render_template("user_page.html", entries=entries)
-
-    else:
-        posts = Blog.query.order_by(Blog.posted.desc()).all()
-        return render_template("blog.html", posts=posts)
 
     
 @app.route("/newpost", methods=["POST", "GET"])

@@ -11,13 +11,28 @@
                 on {{post.posted}}</small>
         {% endfor %}
 
+        <br /><br />
+
+        <div class="pagination">
+        {% if prev_url %}
+            <a href="{{ prev_url }}">&larr; Newer Posts</a>
+        {% endif %}
+
+        {% if prev_url and next_url %}
+            &verbar; <!-- divider -->
+        {% endif %}
+
+        {% if next_url %}
+            <a href="{{ next_url }}"> Older Posts &rarr;</a>
+        {% endif %}
+        </div>
+            
     {% else %}
         <h2>Nothing here yet.</h2>
     
     {% endif %}
 
 </main>
-
 
 {% endblock %}
 
