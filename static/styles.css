@@ -20,9 +20,16 @@ body {
 }
 
 .hero-text {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     text-align: center;
     color: azure;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; 
+    line-height: 1em;
+}
+
+.hero-text h1 {
+     font-size: 4em;
+     letter-spacing: 0.1em;
+     text-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000;
 }
 
 main {
