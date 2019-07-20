@@ -60,32 +60,43 @@ def index():
 
 @app.route("/blog", methods=["POST", "GET"])
 def blog():
-
     post_id = request.args.get("id")
     user_id = request.args.get("user")
     page = request.args.get("page", 1, type=int)
     per_page = 5
 
     if post_id:
-        post = Blog.query.get(post_id)
-        return render_template("single_post.html", post=post)
-
-    if user_id:
-        entries = Blog.query.filter_by(owner_id=user_id).order_by(Blog.posted.desc()).paginate(
-            page, per_page, error_out=False)
-        next_url = url_for("blog", user=user_id, page=entries.next_num) \
-            if entries.has_next else None
-        prev_url = url_for("blog", user=user_id, page=entries.prev_num) \
-            if entries.has_prev else None
-        return render_template("user_page.html", entries=entries.items, next_url=next_url, prev_url=prev_url)
-
+        template = get_post_id_template(post_id)
+    elif user_id:
+        template = get_user_id_template(user_id, page, per_page)
     else:
-        posts = Blog.query.order_by(Blog.posted.desc()).paginate(page, per_page, error_out=False)
-        next_url = url_for("blog", page=posts.next_num) \
-            if posts.has_next else None
-        prev_url = url_for("blog", page=posts.prev_num) \
-            if posts.has_prev else None
-        return render_template("blog.html", posts=posts.items, next_url=next_url, prev_url=prev_url)
+        template = get_default_template(page, per_page)
+    
+    return template
+
+
+def get_post_id_template(post_id):
+    post = Blog.query.get(post_id)
+    return render_template("single_post.html", post=post)
+
+
+def get_user_id_template(user_id, page, per_page):
+    entries = Blog.query.filter_by(owner_id=user_id).order_by(Blog.posted.desc()).paginate(
+        page, per_page, error_out=False)
+    next_url = url_for("blog", user=user_id, page=entries.next_num) \
+        if entries.has_next else None
+    prev_url = url_for("blog", user=user_id, page=entries.prev_num) \
+        if entries.has_prev else None
+    return render_template("user_page.html", entries=entries.items, next_url=next_url, prev_url=prev_url)
+
+
+def get_default_template(page, per_page):
+    posts = Blog.query.order_by(Blog.posted.desc()).paginate(page, per_page, error_out=False)
+    next_url = url_for("blog", page=posts.next_num) \
+        if posts.has_next else None
+    prev_url = url_for("blog", page=posts.prev_num) \
+        if posts.has_prev else None
+    return render_template("blog.html", posts=posts.items, next_url=next_url, prev_url=prev_url)
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -185,7 +196,7 @@ def add_post():
         new_post = Blog(new_title, new_body, logged_in_user(), post_date)
 
         # Make sure there's something in title and body fields, commit to database
-        if len(new_title) != 0 and len(new_body) != 0:
+        if new_title and new_body:
             db.session.add(new_post)
             db.session.commit()
 
